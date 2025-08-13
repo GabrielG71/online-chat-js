@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import bcrypt from "bcryptjs";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,13 +13,15 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password: hashedPassword }),
+        body: JSON.stringify({ name, email, password }), // senha sem hash
       });
-      if (!res.ok) throw new Error("Erro ao registrar usuário");
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao registrar usuário");
+
       alert("Registro feito com sucesso! Faça login agora.");
       router.push("/login");
     } catch (err: any) {

@@ -7,19 +7,25 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     const res = await signIn("credentials", {
       redirect: false,
       email,
       password,
     });
+
+    setLoading(false);
+
     if (!res?.error) {
       router.push("/");
       router.refresh();
     } else {
-      alert("Credenciais inválidas");
+      alert(res.error || "Credenciais inválidas");
     }
   };
 
@@ -62,8 +68,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button className="w-full mt-8 px-6 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 font-semibold focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200">
-            Entrar
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-8 px-6 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 font-semibold focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+          >
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </div>
