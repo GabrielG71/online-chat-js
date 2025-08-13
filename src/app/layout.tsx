@@ -1,10 +1,11 @@
-// app/layout.tsx
 import type { Metadata } from "next";
-import "./style/globals.css";
+import Header from "./components/LayoutComponents/Header";
+import Footer from "./components/LayoutComponents/Footer";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Chat Interativo",
-  description: "Um chat simples em Next.js + TypeScript",
+  title: "Meu App",
+  description: "Exemplo com layout fixo",
 };
 
 export default function RootLayout({
@@ -14,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
