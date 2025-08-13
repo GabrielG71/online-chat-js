@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageSquare } from "lucide-react"; // biblioteca de ícones minimalistas
+import { MessageSquare } from "lucide-react";
 
 const Header: React.FC = () => {
   return (
