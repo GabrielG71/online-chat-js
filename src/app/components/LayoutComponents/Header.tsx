@@ -10,10 +10,12 @@ export default function Header() {
   return (
     <header className="bg-gray-900 text-gray-200 py-4 px-6 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="w-6 h-6 text-blue-400" />
-          <span className="text-xl font-semibold">Online Chat</span>
-        </div>
+        <Link href="/">
+          <div className="flex items-center gap-2 hover:scale-105 transition-all duration-300 hover:text-blue-300 cursor-pointer">
+            <MessageSquare className="w-6 h-6 text-blue-400 hover:text-blue-300 transition-colors duration-300" />
+            <span className="text-xl font-semibold">Online Chat</span>
+          </div>
+        </Link>
 
         {session ? (
           <div className="flex items-center gap-4">
