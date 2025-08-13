@@ -1,34 +1,23 @@
 import React from "react";
-import { Users, Settings } from "lucide-react";
+import { MessageSquare } from "lucide-react"; // biblioteca de ícones minimalistas
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-purple-700 shadow-lg sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <span className="text-2xl">💬</span>
-          <h1 className="text-xl font-bold text-white">Online Chat TS</h1>
+    <header className="bg-gray-900 text-gray-200 py-4 px-6 shadow-md">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-6 h-6 text-blue-400" />
+          <span className="text-xl font-semibold">Online Chat</span>
         </div>
 
-        <nav className="hidden md:flex space-x-6">
-          <a
-            href="#"
-            className="text-white hover:text-blue-200 transition-colors"
-          >
-            Chat
-          </a>
-          <a
-            href="#"
-            className="text-white hover:text-blue-200 transition-colors flex items-center space-x-1"
-          >
-            <Users className="h-4 w-4" />
-            <span>Usuários</span>
-          </a>
-        </nav>
-
-        <button className="p-2 text-white hover:bg-white/10 rounded-lg transition-all">
-          <Settings className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-4">
+          <button className="px-4 py-2 rounded hover:bg-gray-800 transition">
+            Login
+          </button>
+          <button className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition">
+            Registrar
+          </button>
+        </div>
       </div>
     </header>
   );
