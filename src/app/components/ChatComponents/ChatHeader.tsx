@@ -1,5 +1,5 @@
 import { MoreVertical, ArrowLeft } from "lucide-react";
-import { User } from "../types";
+import { User } from "../../types";
 
 interface ChatHeaderProps {
   selectedUser: User;

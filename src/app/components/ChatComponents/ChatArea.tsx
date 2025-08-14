@@ -1,4 +1,4 @@
-import { User, Message } from "../types";
+import { User, Message } from "../../types";
 import ChatHeader from "./ChatHeader";
 import MessagesContainer from "./MessagesContainer";
 import MessageInput from "./MessageInput";
@@ -25,18 +25,13 @@ export default function ChatArea({
   onBack,
   onMessageChange,
   onSendMessage,
-  formatTime
+  formatTime,
 }: ChatAreaProps) {
   return (
-    <div
-      className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col`}
-    >
+    <div className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col`}>
       {selectedUser ? (
         <>
-          <ChatHeader 
-            selectedUser={selectedUser} 
-            onBack={onBack} 
-          />
+          <ChatHeader selectedUser={selectedUser} onBack={onBack} />
           <MessagesContainer
             messages={messages}
             currentUserId={currentUserId}
