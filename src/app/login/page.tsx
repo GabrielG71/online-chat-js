@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.ok) {
-      router.push("/");
+      router.push("/chat");
     } else {
       alert("Email ou senha incorretos");
     }
