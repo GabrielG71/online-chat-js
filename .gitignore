@@ -1,4 +1,5 @@
 node_modules
 .next
 /src/generated/prisma
+/prisma/dev.db
 .env
