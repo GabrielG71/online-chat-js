@@ -1,5 +1,4 @@
 "use client";
-
 import { MessageSquare } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
@@ -8,7 +7,7 @@ export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-gray-900 text-gray-200 py-4 px-6 shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-gray-200 py-4 px-6 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/">
           <div className="flex items-center gap-2 hover:scale-105 transition-all duration-300 hover:text-blue-300 cursor-pointer">
@@ -16,7 +15,6 @@ export default function Header() {
             <span className="text-xl font-semibold">Online Chat</span>
           </div>
         </Link>
-
         {session ? (
           <div className="flex items-center gap-4">
             <span>Olá, {session.user?.name}</span>
