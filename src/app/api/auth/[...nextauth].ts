@@ -1,21 +1,22 @@
+// app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Preencha todos os campos");
+        if (!credentials?.email || !credentials.password) {
+          throw new Error("Email e senha são obrigatórios");
         }
 
         const user = await prisma.user.findUnique({
@@ -26,28 +27,26 @@ export default NextAuth({
           throw new Error("Usuário não encontrado");
         }
 
-        const isPasswordValid = await bcrypt.compare(
+        const isValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
-
-        if (!isPasswordValid) {
+        if (!isValid) {
           throw new Error("Senha incorreta");
         }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
+        return { id: user.id, name: user.name, email: user.email };
       },
     }),
   ],
-  pages: {
-    signIn: "/login",
-  },
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
-});
+  pages: {
+    signIn: "/login",
+  },
+  debug: true,
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
