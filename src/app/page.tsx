@@ -13,9 +13,9 @@ export default function Home() {
             para começar a trocar mensagens!
           </p>
 
-          <div className="space-y-3">
+          <div>
             <Link href="/login">
-              <button className="w-full px-6 py-3 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-colors">
+              <button className="w-full px-6 py-3 mb-4 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-colors">
                 Fazer Login
               </button>
             </Link>
