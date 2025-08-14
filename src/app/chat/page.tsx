@@ -60,10 +60,7 @@ export default function ChatPage() {
               key={conv.id}
               className="p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                  {conv.name.charAt(0)}
-                </div>
+              <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex justify-between">
                     <h3 className="font-medium text-gray-900 dark:text-white">
@@ -76,7 +73,7 @@ export default function ChatPage() {
                   </p>
                 </div>
                 {conv.unread > 0 && (
-                  <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
+                  <span className="ml-3 bg-blue-500 text-white text-xs rounded-full px-2 py-1">
                     {conv.unread}
                   </span>
                 )}
@@ -89,17 +86,9 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col">
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                J
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  João Silva
-                </h3>
-                <p className="text-sm text-green-500">Online</p>
-              </div>
-            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              João Silva
+            </h3>
             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
@@ -114,16 +103,7 @@ export default function ChatPage() {
                 msg.sender === "me" ? "justify-end" : "justify-start"
               }`}
             >
-              <div
-                className={`flex items-end space-x-2 max-w-md ${
-                  msg.sender === "me" ? "flex-row-reverse space-x-reverse" : ""
-                }`}
-              >
-                {msg.sender === "other" && (
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
-                    J
-                  </div>
-                )}
+              <div className={`max-w-md ${msg.sender === "me" ? "" : ""}`}>
                 <div
                   className={`px-4 py-2 rounded-2xl ${
                     msg.sender === "me"
