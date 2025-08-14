@@ -1,5 +1,5 @@
-import { User } from "../types";
-import UserSearch from "./UserSearch";
+import { User } from "../../types";
+import UserSearch from "../ChatComponents/UserSearch";
 import UserList from "./UserList";
 
 interface SidebarProps {
@@ -11,13 +11,13 @@ interface SidebarProps {
   onUserSelect: (user: User) => void;
 }
 
-export default function Sidebar({ 
-  showChat, 
-  users, 
-  searchTerm, 
-  filteredUsers, 
-  onSearchChange, 
-  onUserSelect 
+export default function Sidebar({
+  showChat,
+  users,
+  searchTerm,
+  filteredUsers,
+  onSearchChange,
+  onUserSelect,
 }: SidebarProps) {
   return (
     <div
@@ -25,14 +25,8 @@ export default function Sidebar({
         showChat ? "hidden" : "flex"
       } md:flex w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col`}
     >
-      <UserSearch 
-        searchTerm={searchTerm} 
-        onSearchChange={onSearchChange} 
-      />
-      <UserList 
-        users={filteredUsers} 
-        onUserSelect={onUserSelect} 
-      />
+      <UserSearch searchTerm={searchTerm} onSearchChange={onSearchChange} />
+      <UserList users={filteredUsers} onUserSelect={onUserSelect} />
     </div>
   );
 }
