@@ -1,6 +1,7 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -8,14 +9,14 @@ generator client {
 }
 
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  name     String
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
   password String
-  
+
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
-  
+
   @@map("users")
 }
 
@@ -23,12 +24,12 @@ model Message {
   id         String   @id @default(cuid())
   content    String
   createdAt  DateTime @default(now())
-  
+
   senderId   String
   receiverId String
-  
+
   sender     User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiver   User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  
+
   @@map("messages")
 }
