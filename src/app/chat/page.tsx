@@ -26,7 +26,6 @@ export default function ChatPage() {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !selectedUser) return;
-
     const success = await sendMessage(message, selectedUser.id);
     if (success) {
       setMessage("");
@@ -47,7 +46,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 pt-20">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 pt-20 pb-24">
+      {/* Adicionado pb-24 para dar espaço ao footer fixo */}
       <Sidebar
         showChat={showChat}
         users={users}
@@ -56,7 +56,6 @@ export default function ChatPage() {
         onSearchChange={setSearchTerm}
         onUserSelect={handleSelectUser}
       />
-
       <ChatArea
         showChat={showChat}
         selectedUser={selectedUser}
