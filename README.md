@@ -4,7 +4,7 @@
 
 Projeto criado para permitir que usuários se registrem, façam login e conversem entre si em um ambiente seguro e moderno. A aplicação utiliza autenticação via NextAuth, banco de dados com Prisma e interface estilizada com Tailwind CSS.
 
-** Disponível em: <a>https://online-chat-ts.vercel.app/</a>**
+**Disponível em: <a>https://online-chat-ts.vercel.app/</a>`**
 
 <p align="left">
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
