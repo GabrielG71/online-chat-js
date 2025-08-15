@@ -4,9 +4,9 @@ import { useSession } from "next-auth/react";
 import { User } from "../types";
 import { useChatData } from "../hooks/useChatData";
 import { formatTime } from "../utils";
-import LoadingScreen from "../components/LoadingScreen";
-import Sidebar from "../components/Sidebar";
-import ChatArea from "../components/ChatArea";
+import LoadingScreen from "../components/ChatComponents/LoadingScreen";
+import Sidebar from "../components/ChatComponents/Sidebar";
+import ChatArea from "../components/ChatComponents/ChatArea";
 import ConnectionIndicator from "../components/ConnectionIndicator";
 
 export default function ChatPage() {
