@@ -21,7 +21,7 @@ export default function ChatPage() {
     selectedUser,
     loading,
     setSelectedUser,
-    sendMessage
+    sendMessage,
   } = useChatData(session);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -50,7 +50,7 @@ export default function ChatPage() {
   return (
     <>
       <ConnectionIndicator />
-      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 pt-20">
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-900 pt-16 sm:pt-20">
         <Sidebar
           showChat={showChat}
           users={users}
@@ -59,7 +59,6 @@ export default function ChatPage() {
           onSearchChange={setSearchTerm}
           onUserSelect={handleSelectUser}
         />
-        
         <ChatArea
           showChat={showChat}
           selectedUser={selectedUser}

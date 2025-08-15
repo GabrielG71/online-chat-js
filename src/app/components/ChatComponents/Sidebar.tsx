@@ -22,11 +22,15 @@ export default function Sidebar({
   return (
     <div
       className={`${
-        showChat ? "hidden" : "flex"
-      } md:flex w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col`}
+        showChat ? "hidden md:flex" : "flex"
+      } w-full md:w-80 lg:w-96 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col flex-shrink-0`}
     >
-      <UserSearch searchTerm={searchTerm} onSearchChange={onSearchChange} />
-      <UserList users={filteredUsers} onUserSelect={onUserSelect} />
+      <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+        <UserSearch searchTerm={searchTerm} onSearchChange={onSearchChange} />
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <UserList users={filteredUsers} onUserSelect={onUserSelect} />
+      </div>
     </div>
   );
 }
