@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
 import Header from "./components/LayoutComponents/Header";
 import Footer from "./components/LayoutComponents/Footer";
 import ClientSessionProvider from "./components/ClientSessionProvider";
+import { SocketProvider } from "./context/SocketContext";
 import "./style/globals.css";
 
 export const metadata: Metadata = {
@@ -12,16 +12,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="pt-BR">
-      <body className="flex flex-col min-h-screen">
+      <body>
         <ClientSessionProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SocketProvider>
+            <Header />
+            {children}
+            <Footer />
+          </SocketProvider>
         </ClientSessionProvider>
       </body>
     </html>

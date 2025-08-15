@@ -23,27 +23,37 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      console.log("⏳ Aguardando sessão...");
+      return;
+    }
 
-    const socketInstance = io(process.env.NODE_ENV === "production" ? "" : "http://localhost:3000", {
+    console.log("🔌 Conectando ao Socket.IO...");
+    
+    const socketInstance = io({
       path: "/api/socket/io",
       addTrailingSlash: false,
     });
 
     socketInstance.on("connect", () => {
-      console.log("Connected to server");
+      console.log("✅ Conectado ao servidor!");
       setIsConnected(true);
       socketInstance.emit("join-room", session.user.id);
     });
 
     socketInstance.on("disconnect", () => {
-      console.log("Disconnected from server");
+      console.log("❌ Desconectado do servidor");
       setIsConnected(false);
+    });
+
+    socketInstance.on("connect_error", (error) => {
+      console.error("❌ Erro de conexão:", error);
     });
 
     setSocket(socketInstance);
 
     return () => {
+      console.log("🔌 Desconectando...");
       socketInstance.disconnect();
     };
   }, [session?.user?.id]);
