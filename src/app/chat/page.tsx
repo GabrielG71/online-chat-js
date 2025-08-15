@@ -27,7 +27,6 @@ export default function ChatPage() {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !selectedUser) return;
-
     const success = await sendMessage(message, selectedUser.id);
     if (success) {
       setMessage("");
