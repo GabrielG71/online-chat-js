@@ -14,6 +14,14 @@ export function removeConnection(connectionKey: string) {
   connections.delete(connectionKey);
 }
 
+export function hasConnection(connectionKey: string) {
+  return connections.has(connectionKey);
+}
+
+export function getConnection(connectionKey: string) {
+  return connections.get(connectionKey);
+}
+
 export function broadcastMessage(
   senderId: string,
   receiverId: string,
