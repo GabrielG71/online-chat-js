@@ -23,7 +23,7 @@ export function useSSE({
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const connect = () => {
     if (!otherUserId) return;
@@ -66,6 +66,7 @@ export function useSSE({
               break;
 
             case "ping":
+              // Heartbeat - não fazer nada
               break;
 
             default:
@@ -81,6 +82,7 @@ export function useSSE({
         setIsConnected(false);
         setError("Erro na conexão");
 
+        // Tentar reconectar após 3 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
           console.log("Tentando reconectar SSE...");
           connect();
