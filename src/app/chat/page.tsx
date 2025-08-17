@@ -79,9 +79,6 @@ export default function ChatPage() {
         messages={messages}
         message={message}
         currentUserId={session?.user?.id}
-        isConnected={isConnected}
-        sseError={sseError}
-        isUserTyping={selectedUser ? isUserTyping(selectedUser.id) : false}
         onBack={() => setShowChat(false)}
         onMessageChange={handleMessageChange}
         onSendMessage={handleSendMessage}
