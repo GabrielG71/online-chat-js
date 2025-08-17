@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-
-const connections = new Map<
-  string,
-  ReadableStreamDefaultController<Uint8Array>
->();
+import { addConnection, removeConnection } from "@/lib/sse-manager";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     const stream = new ReadableStream({
       start(controller) {
-        connections.set(connectionKey, controller);
+        addConnection(connectionKey, controller);
 
         const data = JSON.stringify({ type: "connected" });
         controller.enqueue(new TextEncoder().encode(`data: ${data}\n\n`));
@@ -39,20 +35,20 @@ export async function GET(request: NextRequest) {
             );
           } catch (error) {
             clearInterval(heartbeat);
-            connections.delete(connectionKey);
+            removeConnection(connectionKey);
           }
         }, 30000);
 
         request.signal.addEventListener("abort", () => {
           clearInterval(heartbeat);
-          connections.delete(connectionKey);
+          removeConnection(connectionKey);
           try {
             controller.close();
           } catch (error) {}
         });
       },
       cancel() {
-        connections.delete(connectionKey);
+        removeConnection(connectionKey);
       },
     });
 

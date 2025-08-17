@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
-import { broadcastMessage } from "../chat/sse/route";
+import { broadcastMessage } from "@/lib/sse-manager";
 
 const prisma = new PrismaClient();
 
