@@ -47,7 +47,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 pt-20 pb-24">
-      {/* Adicionado pb-24 para dar espaço ao footer fixo */}
       <Sidebar
         showChat={showChat}
         users={users}
