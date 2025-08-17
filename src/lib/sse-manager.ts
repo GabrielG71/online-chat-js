@@ -1,3 +1,4 @@
+// lib/sse-manager.ts
 type SSEController = ReadableStreamDefaultController<Uint8Array>;
 
 interface Connection {
@@ -6,13 +7,16 @@ interface Connection {
   connectedAt: number;
 }
 
+// Armazenar conexões ativas com mais informações
 const connections = new Map<string, Connection>();
 
+// Função para gerar chave de conexão consistente
 function generateConnectionKey(userId1: string, userId2: string): string {
   // Sempre colocar o menor ID primeiro para consistência
   return userId1 < userId2 ? `${userId1}-${userId2}` : `${userId2}-${userId1}`;
 }
 
+// Função para obter todas as chaves de conexão para um usuário
 function getConnectionKeysForUser(userId: string): string[] {
   const keys: string[] = [];
   connections.forEach((_, key) => {
@@ -27,21 +31,25 @@ export function addConnection(
   connectionKey: string,
   controller: SSEController
 ) {
-  const [userId] = connectionKey.split("-");
+  // Extrair userId da chave de conexão
+  const userId = connectionKey.replace("user-", "");
 
-  const oldKeys = getConnectionKeysForUser(userId);
-  oldKeys.forEach((key) => {
-    const oldConnection = connections.get(key);
-    if (oldConnection && oldConnection.userId === userId) {
+  // Remover conexão antiga do mesmo usuário
+  if (connections.has(connectionKey)) {
+    const oldConnection = connections.get(connectionKey);
+    if (oldConnection) {
       try {
         oldConnection.controller.close();
+        console.log(`🔄 [CONN] Conexão antiga fechada: ${connectionKey}`);
       } catch (error) {
-        console.log(`Conexão antiga fechada: ${key}`);
+        console.log(
+          `⚠️ [CONN] Erro ao fechar conexão antiga: ${connectionKey}`
+        );
       }
-      connections.delete(key);
     }
-  });
+  }
 
+  // Adicionar nova conexão
   connections.set(connectionKey, {
     controller,
     userId,
@@ -49,7 +57,7 @@ export function addConnection(
   });
 
   console.log(
-    `✅ Conexão adicionada: ${connectionKey} (User: ${userId}). Total: ${connections.size}`
+    `✅ [CONN] Adicionada: ${connectionKey} (User: ${userId}). Total: ${connections.size}`
   );
 }
 
@@ -58,7 +66,9 @@ export function removeConnection(connectionKey: string) {
   if (connection) {
     try {
       connection.controller.close();
-    } catch (error) {}
+    } catch (error) {
+      // Ignore errors when closing
+    }
   }
 
   connections.delete(connectionKey);
@@ -72,24 +82,25 @@ export function broadcastMessage(
   receiverId: string,
   message: any
 ) {
-  console.log(`📤 Broadcasting message from ${senderId} to ${receiverId}`);
+  console.log(`📤 [BROADCAST] Mensagem de ${senderId} para ${receiverId}`);
 
-  // Gerar chave de conexão consistente
-  const baseKey = generateConnectionKey(senderId, receiverId);
-
-  const relevantConnections: string[] = [];
-  connections.forEach((connection, key) => {
-    if (key.includes(senderId) || key.includes(receiverId)) {
-      relevantConnections.push(key);
-    }
-  });
+  // Enviar para conexões globais dos usuários envolvidos
+  const targetConnections = [
+    `user-${senderId}`, // Para quem enviou (confirmação)
+    `user-${receiverId}`, // Para quem vai receber
+  ];
 
   console.log(
-    `🔍 Conexões encontradas para broadcast: ${relevantConnections.join(", ")}`
+    `🔍 [BROADCAST] Procurando conexões: ${targetConnections.join(", ")}`
+  );
+  console.log(
+    `🔍 [BROADCAST] Conexões ativas: ${Array.from(connections.keys()).join(
+      ", "
+    )}`
   );
 
   let messagesSent = 0;
-  relevantConnections.forEach((connectionKey) => {
+  targetConnections.forEach((connectionKey) => {
     const connection = connections.get(connectionKey);
     if (connection) {
       try {
@@ -103,18 +114,24 @@ export function broadcastMessage(
         );
 
         messagesSent++;
-        console.log(`✅ Mensagem enviada via SSE para: ${connectionKey}`);
+        console.log(
+          `✅ [BROADCAST] Mensagem enviada via SSE para: ${connectionKey}`
+        );
       } catch (error) {
         console.error(
-          `❌ Erro ao enviar mensagem SSE para ${connectionKey}:`,
+          `❌ [BROADCAST] Erro ao enviar para ${connectionKey}:`,
           error
         );
         connections.delete(connectionKey);
       }
+    } else {
+      console.log(`⚠️ [BROADCAST] Conexão não encontrada: ${connectionKey}`);
     }
   });
 
-  console.log(`📊 Total de mensagens enviadas: ${messagesSent}`);
+  console.log(
+    `📊 [BROADCAST] Total de mensagens enviadas: ${messagesSent}/${targetConnections.length}`
+  );
 }
 
 export function broadcastTypingStatus(
@@ -123,39 +140,41 @@ export function broadcastTypingStatus(
   isTyping: boolean
 ) {
   console.log(
-    `⌨️ Broadcasting typing status: ${senderId} -> ${receiverId} (${isTyping})`
+    `⌨️ [TYPING] Status de ${senderId} para ${receiverId}: ${isTyping}`
   );
 
-  let statusSent = 0;
-  connections.forEach((connection, key) => {
-    // Se a conexão é do receptor e inclui o sender
-    if (connection.userId === receiverId && key.includes(senderId)) {
-      try {
-        const data = JSON.stringify({
-          type: "typing_status",
-          senderId: senderId,
-          isTyping: isTyping,
-        });
+  // Enviar apenas para o receptor
+  const targetConnection = `user-${receiverId}`;
+  const connection = connections.get(targetConnection);
 
-        connection.controller.enqueue(
-          new TextEncoder().encode(`data: ${data}\n\n`)
-        );
+  if (connection) {
+    try {
+      const data = JSON.stringify({
+        type: "typing_status",
+        senderId: senderId,
+        isTyping: isTyping,
+      });
 
-        statusSent++;
-        console.log(`✅ Status de digitação enviado via SSE para: ${key}`);
-      } catch (error) {
-        console.error(
-          `❌ Erro ao enviar status de digitação SSE para ${key}:`,
-          error
-        );
-        connections.delete(key);
-      }
+      connection.controller.enqueue(
+        new TextEncoder().encode(`data: ${data}\n\n`)
+      );
+
+      console.log(
+        `✅ [TYPING] Status enviado via SSE para: ${targetConnection}`
+      );
+    } catch (error) {
+      console.error(
+        `❌ [TYPING] Erro ao enviar para ${targetConnection}:`,
+        error
+      );
+      connections.delete(targetConnection);
     }
-  });
-
-  console.log(`📊 Total de status enviados: ${statusSent}`);
+  } else {
+    console.log(`⚠️ [TYPING] Conexão não encontrada: ${targetConnection}`);
+  }
 }
 
+// Função para debug - listar todas as conexões ativas
 export function listActiveConnections() {
   console.log("🔍 Conexões ativas:");
   connections.forEach((connection, key) => {

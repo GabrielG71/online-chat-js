@@ -17,14 +17,12 @@ interface SSEData {
 }
 
 interface UseSSEProps {
-  otherUserId: string | null;
   currentUserId?: string;
   onNewMessage: (message: Message) => void;
   onTypingStatusChange: (senderId: string, isTyping: boolean) => void;
 }
 
 export function useSSE({
-  otherUserId,
   currentUserId,
   onNewMessage,
   onTypingStatusChange,
@@ -32,19 +30,15 @@ export function useSSE({
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const [lastActivity, setLastActivity] = useState<number>(Date.now());
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isConnectingRef = useRef(false);
-  const connectionStartTimeRef = useRef<number>(0);
 
-  // Configurações específicas para Vercel
-  const MAX_RECONNECT_ATTEMPTS = 10; // Mais tentativas para Vercel
-  const BASE_RECONNECT_DELAY = 1000; // Delay menor inicial
-  const MAX_RECONNECT_DELAY = 30000; // Máximo 30s
-  const CONNECTION_TIMEOUT = 15000; // 15s timeout
-  const VERCEL_FUNCTION_TIMEOUT = 270000; // 4.5min - limite do Vercel
+  const MAX_RECONNECT_ATTEMPTS = 10;
+  const BASE_RECONNECT_DELAY = 1000;
+  const MAX_RECONNECT_DELAY = 30000;
+  const CONNECTION_TIMEOUT = 15000;
 
   const cleanup = useCallback(() => {
     console.log("🧹 Limpando conexão SSE...");
@@ -67,11 +61,8 @@ export function useSSE({
   }, []);
 
   const connect = useCallback(() => {
-    if (!otherUserId || !currentUserId) {
-      console.log("❌ Não é possível conectar: faltam IDs", {
-        otherUserId,
-        currentUserId,
-      });
+    if (!currentUserId) {
+      console.log("❌ Não é possível conectar: falta currentUserId");
       return;
     }
 
@@ -86,53 +77,50 @@ export function useSSE({
       return;
     }
 
-    cleanup();
+    // Só fazer cleanup se não estiver conectado
+    if (!isConnected) {
+      cleanup();
+    }
+
     isConnectingRef.current = true;
-    connectionStartTimeRef.current = Date.now();
 
     const attempt = reconnectAttempts + 1;
     console.log(
-      `🔄 Tentativa de conexão SSE ${attempt}/${MAX_RECONNECT_ATTEMPTS}: ${currentUserId} -> ${otherUserId}`
+      `🔄 Conexão SSE global para usuário: ${currentUserId} (Tentativa ${attempt})`
     );
 
     try {
-      // URL com timestamp para evitar cache
-      const url = `/api/chat/sse?userId=${otherUserId}&t=${Date.now()}`;
+      // Conexão SSE global - sem otherUserId específico
+      const url = `/api/chat/sse?t=${Date.now()}`;
       console.log("📡 Conectando em:", url);
 
       const eventSource = new EventSource(url);
       eventSourceRef.current = eventSource;
 
-      // Timeout de conexão
       const connectionTimeout = setTimeout(() => {
         if (!isConnected && eventSource.readyState !== EventSource.OPEN) {
           console.log("⏰ Timeout de conexão SSE");
           eventSource.close();
           setError("Timeout na conexão");
           isConnectingRef.current = false;
-
-          // Tentar reconectar
           scheduleReconnect();
         }
       }, CONNECTION_TIMEOUT);
 
       eventSource.onopen = () => {
         clearTimeout(connectionTimeout);
-        const connectionTime = Date.now() - connectionStartTimeRef.current;
         console.log(
-          `✅ SSE conectado em ${connectionTime}ms (Tentativa ${attempt})`
+          `✅ SSE conectado globalmente para usuário: ${currentUserId}`
         );
 
         setIsConnected(true);
         setError(null);
         setReconnectAttempts(0);
-        setLastActivity(Date.now());
         isConnectingRef.current = false;
       };
 
       eventSource.onmessage = (event) => {
         try {
-          setLastActivity(Date.now());
           const data: SSEData = JSON.parse(event.data);
 
           console.log(
@@ -167,7 +155,6 @@ export function useSSE({
               break;
 
             case "ping":
-              // Heartbeat - apenas log de debug
               console.log("💓 Heartbeat recebido");
               break;
 
@@ -194,12 +181,8 @@ export function useSSE({
       eventSource.onerror = (event) => {
         clearTimeout(connectionTimeout);
         const readyState = eventSource.readyState;
-        const connectionTime = Date.now() - connectionStartTimeRef.current;
 
-        console.error(
-          `❌ Erro SSE após ${connectionTime}ms (Estado: ${readyState}):`,
-          event
-        );
+        console.error(`❌ Erro SSE (Estado: ${readyState}):`, event);
 
         setIsConnected(false);
         isConnectingRef.current = false;
@@ -215,7 +198,6 @@ export function useSSE({
       scheduleReconnect();
     }
   }, [
-    otherUserId,
     currentUserId,
     reconnectAttempts,
     onNewMessage,
@@ -233,12 +215,11 @@ export function useSSE({
     const newAttempts = reconnectAttempts + 1;
     setReconnectAttempts(newAttempts);
 
-    // Backoff exponencial com jitter
     const baseDelay = Math.min(
       BASE_RECONNECT_DELAY * Math.pow(2, newAttempts - 1),
       MAX_RECONNECT_DELAY
     );
-    const jitter = Math.random() * 1000; // Até 1s de jitter
+    const jitter = Math.random() * 1000;
     const delay = baseDelay + jitter;
 
     console.log(
@@ -271,33 +252,16 @@ export function useSSE({
     connect();
   }, [connect]);
 
-  // Efeito principal
+  // Conectar apenas uma vez quando o usuário estiver disponível
   useEffect(() => {
-    if (otherUserId && currentUserId) {
+    if (currentUserId) {
       connect();
     } else {
       disconnect();
     }
 
     return disconnect;
-  }, [otherUserId, currentUserId]);
-
-  // Reconexão automática baseada em atividade (para Vercel)
-  useEffect(() => {
-    if (!isConnected) return;
-
-    const checkActivity = setInterval(() => {
-      const timeSinceLastActivity = Date.now() - lastActivity;
-
-      // Se passou muito tempo sem atividade, reconectar preventivamente
-      if (timeSinceLastActivity > VERCEL_FUNCTION_TIMEOUT * 0.9) {
-        console.log("🔄 Reconexão preventiva devido a inatividade");
-        connect();
-      }
-    }, 60000); // Verificar a cada minuto
-
-    return () => clearInterval(checkActivity);
-  }, [isConnected, lastActivity, connect]);
+  }, [currentUserId]); // Remover outras dependências para evitar reconexões
 
   // Cleanup final
   useEffect(() => {
@@ -311,7 +275,6 @@ export function useSSE({
     isConnected,
     error,
     reconnectAttempts,
-    lastActivity: new Date(lastActivity),
     reconnect: forceReconnect,
   };
 }

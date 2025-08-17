@@ -63,13 +63,12 @@ export function useChatData(session: Session | null) {
     []
   );
 
-  // Hook SSE com logs melhorados
+  // Hook SSE global (uma conexão por usuário)
   const {
     isConnected,
     error: sseError,
     reconnectAttempts,
   } = useSSE({
-    otherUserId: selectedUser?.id || null,
     currentUserId: session?.user?.id,
     onNewMessage: handleNewMessage,
     onTypingStatusChange: handleTypingStatusChange,
