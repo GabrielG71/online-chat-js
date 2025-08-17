@@ -1,25 +1,20 @@
-const connections = new Map<
-  string,
-  ReadableStreamDefaultController<Uint8Array>
->();
+type SSEController = ReadableStreamDefaultController<Uint8Array>;
+
+const connections = new Map<string, SSEController>();
 
 export function addConnection(
   connectionKey: string,
-  controller: ReadableStreamDefaultController<Uint8Array>
+  controller: SSEController
 ) {
   connections.set(connectionKey, controller);
+  console.log(
+    `Conexão adicionada: ${connectionKey}. Total: ${connections.size}`
+  );
 }
 
 export function removeConnection(connectionKey: string) {
   connections.delete(connectionKey);
-}
-
-export function hasConnection(connectionKey: string) {
-  return connections.has(connectionKey);
-}
-
-export function getConnection(connectionKey: string) {
-  return connections.get(connectionKey);
+  console.log(`Conexão removida: ${connectionKey}. Total: ${connections.size}`);
 }
 
 export function broadcastMessage(
@@ -27,24 +22,29 @@ export function broadcastMessage(
   receiverId: string,
   message: any
 ) {
-  const connectionKey1 = `${senderId}-${receiverId}`;
-  const connectionKey2 = `${receiverId}-${senderId}`;
+  const connections_to_notify = [
+    `${senderId}-${receiverId}`,
+    `${receiverId}-${senderId}`,
+  ];
 
-  const messageData = JSON.stringify({
-    type: "new_message",
-    message,
-  });
-
-  [connectionKey1, connectionKey2].forEach((key) => {
-    const controller = connections.get(key);
+  connections_to_notify.forEach((connectionKey) => {
+    const controller = connections.get(connectionKey);
     if (controller) {
       try {
-        controller.enqueue(
-          new TextEncoder().encode(`data: ${messageData}\n\n`)
-        );
+        const data = JSON.stringify({
+          type: "new_message",
+          message: message,
+        });
+
+        controller.enqueue(new TextEncoder().encode(`data: ${data}\n\n`));
+
+        console.log(`Mensagem enviada via SSE para: ${connectionKey}`);
       } catch (error) {
-        console.error(`Erro ao enviar para ${key}:`, error);
-        connections.delete(key);
+        console.error(
+          `Erro ao enviar mensagem SSE para ${connectionKey}:`,
+          error
+        );
+        connections.delete(connectionKey);
       }
     }
   });
@@ -62,12 +62,18 @@ export function broadcastTypingStatus(
     try {
       const data = JSON.stringify({
         type: "typing_status",
-        senderId,
-        isTyping,
+        senderId: senderId,
+        isTyping: isTyping,
       });
+
       controller.enqueue(new TextEncoder().encode(`data: ${data}\n\n`));
+
+      console.log(`Status de digitação enviado via SSE para: ${connectionKey}`);
     } catch (error) {
-      console.error("Erro ao enviar status de digitação:", error);
+      console.error(
+        `Erro ao enviar status de digitação SSE para ${connectionKey}:`,
+        error
+      );
       connections.delete(connectionKey);
     }
   }

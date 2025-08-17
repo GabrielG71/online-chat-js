@@ -33,9 +33,11 @@ export function useSSE({
     }
 
     try {
+      // Corrigido: usar template strings corretamente
       const eventSource = new EventSource(
         `/api/chat/sse?userId=${otherUserId}`
       );
+
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
@@ -52,23 +54,25 @@ export function useSSE({
             case "connected":
               console.log("Conexão SSE estabelecida");
               break;
-
             case "new_message":
               if (data.message) {
+                console.log("Nova mensagem recebida via SSE:", data.message);
                 onNewMessage(data.message);
               }
               break;
-
             case "typing_status":
               if (data.senderId !== undefined && data.isTyping !== undefined) {
+                console.log(
+                  "Status de digitação recebido:",
+                  data.senderId,
+                  data.isTyping
+                );
                 onTypingStatusChange(data.senderId, data.isTyping);
               }
               break;
-
             case "ping":
               // Heartbeat - não fazer nada
               break;
-
             default:
               console.log("Tipo de mensagem SSE desconhecido:", data.type);
           }

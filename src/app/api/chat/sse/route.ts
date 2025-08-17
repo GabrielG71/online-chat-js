@@ -44,7 +44,9 @@ export async function GET(request: NextRequest) {
           removeConnection(connectionKey);
           try {
             controller.close();
-          } catch (error) {}
+          } catch (error) {
+            console.error("Erro ao fechar controller:", error);
+          }
         });
       },
       cancel() {
