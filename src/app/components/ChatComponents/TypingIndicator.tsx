@@ -1,3 +1,5 @@
+"use client";
+
 interface TypingIndicatorProps {
   isTyping: boolean;
   userName: string;

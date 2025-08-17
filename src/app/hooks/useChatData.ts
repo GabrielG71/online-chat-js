@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { User, Message } from "../types";
 import { useSSE } from "./useSSE";
@@ -17,7 +18,6 @@ export function useChatData(session: Session | null) {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Handlers para SSE
   const handleNewMessage = useCallback((message: Message) => {
     setMessages((prev) => {
       // Verificar se a mensagem já existe para evitar duplicatas

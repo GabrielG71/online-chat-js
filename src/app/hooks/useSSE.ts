@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "../types";
 
@@ -27,7 +28,6 @@ export function useSSE({
   const connect = () => {
     if (!otherUserId) return;
 
-    // Fechar conexão existente
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }

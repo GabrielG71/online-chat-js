@@ -1,3 +1,5 @@
+"use client";
+
 interface ConnectionStatusProps {
   isConnected: boolean;
   error: string | null;
