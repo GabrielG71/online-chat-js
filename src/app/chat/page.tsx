@@ -71,13 +71,6 @@ export default function ChatPage() {
         filteredUsers={filteredUsers}
         onSearchChange={setSearchTerm}
         onUserSelect={handleSelectUser}
-        typingUsers={
-          new Set(
-            Array.from(new Set(messages.map((m) => m.senderId))).filter((id) =>
-              isUserTyping(id)
-            )
-          )
-        }
       />
 
       <ChatArea
