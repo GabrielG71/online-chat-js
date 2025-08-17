@@ -1,0 +1,30 @@
+{
+  "functions": {
+    "app/api/chat/sse/route.ts": {
+      "maxDuration": 300
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/chat/sse",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Connection",
+          "value": "keep-alive"
+        },
+        {
+          "key": "Content-Type",
+          "value": "text/event-stream"
+        },
+        {
+          "key": "X-Accel-Buffering",
+          "value": "no"
+        }
+      ]
+    }
+  ]
+}
