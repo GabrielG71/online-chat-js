@@ -2,13 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { User, Message } from "../types";
 import { useSSE } from "./useSSE";
-
-interface Session {
-  user: {
-    id: string;
-    name?: string;
-  };
-}
+import { Session } from "next-auth";
 
 export function useChatData(session: Session | null) {
   const [users, setUsers] = useState<User[]>([]);
@@ -18,6 +12,7 @@ export function useChatData(session: Session | null) {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Handlers para SSE
   const handleNewMessage = useCallback((message: Message) => {
     setMessages((prev) => {
       // Verificar se a mensagem já existe para evitar duplicatas
@@ -43,18 +38,21 @@ export function useChatData(session: Session | null) {
     []
   );
 
+  // Hook SSE
   const { isConnected, error: sseError } = useSSE({
     otherUserId: selectedUser?.id || null,
     onNewMessage: handleNewMessage,
     onTypingStatusChange: handleTypingStatusChange,
   });
 
+  // Buscar usuários
   useEffect(() => {
     if (session?.user?.id) {
       fetchUsers();
     }
   }, [session]);
 
+  // Buscar mensagens quando usuário é selecionado
   useEffect(() => {
     if (selectedUser && session?.user?.id) {
       fetchMessages(selectedUser.id);
@@ -99,8 +97,11 @@ export function useChatData(session: Session | null) {
       });
 
       if (response.ok) {
+        // A mensagem será adicionada automaticamente via SSE
+        // mas podemos adicionar localmente para feedback imediato
         const newMessage = await response.json();
 
+        // Adicionar mensagem localmente se não foi recebida via SSE ainda
         setMessages((prev) => {
           if (!prev.some((m) => m.id === newMessage.id)) {
             return [...prev, newMessage];
@@ -129,12 +130,15 @@ export function useChatData(session: Session | null) {
   };
 
   const handleTyping = (receiverId: string) => {
+    // Enviar que está digitando
     sendTypingStatus(receiverId, true);
 
+    // Limpar timeout anterior
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
+    // Definir que parou de digitar após 2 segundos
     typingTimeoutRef.current = setTimeout(() => {
       sendTypingStatus(receiverId, false);
     }, 2000);
